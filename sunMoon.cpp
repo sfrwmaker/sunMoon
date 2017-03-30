@@ -63,6 +63,13 @@ time_t sunMoon::sunSet(time_t date) {
 time_t sunMoon::sunTime(bool sunRise, time_t date) {
 
   if (date == 0) date = now();
+  // Calculate the sunrise and sunset times for date and 'noon time'
+  tmElements_t tm;
+  breakTime(date, tm);
+  tm.Hour    = 12;
+  tm.Minute = 0;
+  tm.Second = 0;
+  date = makeTime(tm);
   date -= tz*60;
 
   // first calculate the day of the year
@@ -125,10 +132,6 @@ float decl = toDeg*asin(sinDec);
   float UT = T - lngHour;
   float localT = UT + (float)tz / 60.0;
 
-  tmElements_t tm;
-  time_t ret = now();
-  breakTime(ret, tm);
-
   tm.Hour = (uint8_t)localT;
   localT -= tm.Hour;
   localT *= 60;
@@ -137,7 +140,7 @@ float decl = toDeg*asin(sinDec);
   localT *= 60;
   tm.Second = (uint8_t)localT;
 
-  ret = makeTime(tm);
+  time_t ret = makeTime(tm);
   return ret;  
 }
 

@@ -28,39 +28,74 @@ uint32_t sunMoon::julianDay(time_t date) {
   return ((uint32_t)day(date) + (c * 146097L) / 4 + (y * 1461L) / 4 + (m * 153L + 2) / 5 + 1721119L);
 }
 
+float sunMoon::moonPhase(time_t date) {
+ return normalize((julianDay(date) - 2451550.1) / 29.530588853);
+}
+
 uint8_t sunMoon::moonDay(time_t date) {
 
- float IP = normalize((julianDay(date) - 2451550.1) / 29.530588853);
- IP *= 29.530588853;
- uint8_t age = (uint8_t)IP;
+ float MoonPhase = moonPhase(date);
+ MoonPhase *= 29.530588853;
+ uint8_t age = (uint8_t)MoonPhase;
  return age;
+}
+
+float sunMoon::moonPercent(time_t date) {
+
+ float MoonPhase = moonPhase(date);
+ return square(sin(MoonPhase*M_PI))*100;
 }
 
 sunMoon::forecast sunMoon::dayForecast(char mDay) {
   static enum forecast f[30] = {
-    day_unhappy, day_happy, day_dangerous, day_happy, day_unhappy,
-    day_happiest, day_happy, day_happy, day_normal, day_happiest,
-    day_happy, day_unhappy, day_dangerous, day_happy, day_normal,
-    day_happiest, day_dangerous, day_happy, day_dangerous, day_happiest,
-    day_happy, day_unhappy, day_happy, day_normal, day_unhappy,
-    day_unhappy, day_happiest, day_happy, day_unhappy, day_happy
+    New_Moon,Waxing_Crescent,Waxing_Crescent,Waxing_Crescent,Waxing_Crescent,
+    Waxing_Crescent,First_Quarter,First_Quarter,Waxing_Gibbous,Waxing_Gibbous,
+    Waxing_Gibbous,Waxing_Gibbous,Waxing_Gibbous,Full_Moon,Full_Moon,
+    Full_Moon,Waning_Gibbous,Waning_Gibbous,Waning_Gibbous,Waning_Gibbous,
+    Waning_Gibbous,Last_Quarter,Last_Quarter,Waning_Crescent,Waning_Crescent,
+    Waning_Crescent,Waning_Crescent,Waning_Crescent,New_Moon,New_Moon
   };
 
+
   if (mDay < 0) mDay =  moonDay();
-  if ((mDay > 29) || mDay < 0) return day_normal;
+  if ((mDay > 29) || mDay < 0) return New_Moon;
   return f[mDay];
 
 }
 
 time_t sunMoon::sunRise(time_t date) {
-  return sunTime(true, date);
+  return sunTime(true, date, 90.83*toRad);
 }
 
 time_t sunMoon::sunSet(time_t date) {
-  return sunTime(false, date);
+  return sunTime(false, date, 90.83*toRad);
 }
 
-time_t sunMoon::sunTime(bool sunRise, time_t date) {
+time_t sunMoon::sunRiseCivilTwilight(time_t date) {
+  return sunTime(true, date, 96.83*toRad);
+}
+
+time_t sunMoon::sunSetCivilTwilight(time_t date) {
+  return sunTime(false, date, 96.83*toRad);
+}
+
+time_t sunMoon::sunRiseNauticalTwilight(time_t date) {
+  return sunTime(true, date, 102.83*toRad);
+}
+
+time_t sunMoon::sunSetNauticalTwilight(time_t date) {
+  return sunTime(false, date, 102.83*toRad);
+}
+
+time_t sunMoon::sunRiseAstronomicalTwilight(time_t date) {
+  return sunTime(true, date, 108.83*toRad);
+}
+
+time_t sunMoon::sunSetAstronomicalTwilight(time_t date) {
+  return sunTime(false, date, 108.83*toRad);
+}
+
+time_t sunMoon::sunTime(bool sunRise, time_t date, float zenith) {
 
   if (date == 0) date = now();
   // Calculate the sunrise and sunset times for date and 'noon time'
@@ -110,7 +145,7 @@ time_t sunMoon::sunTime(bool sunRise, time_t date) {
   float sinDec = 0.39782 * sin(L);
   float cosDec = cos(asin(sinDec));
 
-float decl = toDeg*asin(sinDec);
+  float decl = toDeg*asin(sinDec);
 
   // calculate the Sun's local hour angle
   float cosH = (cos(zenith) - (sinDec * sin(latitude*toRad))) / (cosDec * cos(latitude*toRad));

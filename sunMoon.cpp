@@ -33,7 +33,7 @@ uint8_t sunMoon::moonDay(time_t date) {
  float IP = normalize((julianDay(date) - 2451550.1) / 29.530588853);
  IP *= 29.530588853;
  uint8_t age = (uint8_t)IP;
- return age;
+ return age + 1;
 }
 
 sunMoon::forecast sunMoon::dayForecast(char mDay) {
@@ -66,7 +66,7 @@ time_t sunMoon::sunTime(bool sunRise, time_t date) {
   // Calculate the sunrise and sunset times for date and 'noon time'
   tmElements_t tm;
   breakTime(date, tm);
-  tm.Hour    = 12;
+  tm.Hour   = 12;
   tm.Minute = 0;
   tm.Second = 0;
   date = makeTime(tm);
@@ -75,7 +75,7 @@ time_t sunMoon::sunTime(bool sunRise, time_t date) {
   // first calculate the day of the year
   int N1 = 275 * (month(date)) / 9;
   int N2 = (month(date)+9)/12;
-  int N3 = 1 + (year(date) - 4 * (year(date)) / 4 + 2) / 3;
+  int N3 = 1 + (year(date) - 4 * (year(date) / 4) + 2) / 3;
   int N = N1 - (N2 * N3) + day(date) - 30;
   
   // convert the longitude to hour value and calculate an approximate time

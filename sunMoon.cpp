@@ -43,7 +43,7 @@ uint8_t sunMoon::moonDay(time_t date) {
 float sunMoon::moonPercent(time_t date) {
 
  float MoonPhase = moonPhase(date);
- return square(sin(MoonPhase*M_PI))*100;
+ return pow(sin(MoonPhase*M_PI),2)*100;
 }
 
 sunMoon::forecast sunMoon::dayForecast(char mDay) {

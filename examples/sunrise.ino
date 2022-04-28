@@ -8,11 +8,12 @@
 #define OUR_timezone    180                     // localtime with UTC difference in minutes
 
 sunMoon  sm;
+DS3232RTC myRTC;
 
 void printDate(time_t date) {
   char buff[20];
   sprintf(buff, "%2d-%02d-%4d %02d:%02d:%02d",
-  day(date), month(date), year(date), hour(date), minute(date), second(date));
+          day(date), month(date), year(date), hour(date), minute(date), second(date));
   Serial.print(buff);
 }
 
@@ -26,19 +27,20 @@ void setup() {
   tm.Month  = 8;
   tm.Year   = 2016 - 1970;
   time_t s_date = makeTime(tm);
-  
- 
+
+
   Serial.begin(9600);
-  setSyncProvider(RTC.get);                     // the function to get the time from the RTC
-  if (timeStatus() != timeSet) 
+  myRTC.begin();
+  setSyncProvider(myRTC.get);                     // the function to get the time from the RTC
+  if (timeStatus() != timeSet)
     Serial.println("Unable to sync with the RTC");
   else
     Serial.println("RTC has set the system time");
   sm.init(OUR_timezone, OUR_latitude, OUR_longtitude);
 
   Serial.print("Today is ");
-  printDate(RTC.get()); Serial.println("");
-  
+  printDate(myRTC.get()); Serial.println("");
+
   uint32_t jDay = sm.julianDay();               // Optional call
   byte mDay = sm.moonDay();
   time_t sRise = sm.sunRise();
